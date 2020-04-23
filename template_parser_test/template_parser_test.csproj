@@ -15,4 +15,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\template_parser\TemplateParser.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\template_parser\.editorconfig" />
+  </ItemGroup>
 </Project>

@@ -1,3 +1,4 @@
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using NUnit.Framework;
@@ -5,9 +6,9 @@ using TemplateParser;
 
 namespace Tests
 {
-    public class TestsSourceXmlReader
+    public class TestsTextReplacer
     {
-        public SourceXmlReader sr;
+        public TextReplacer tr;
 
         public string xml = @"<whatever>
                                 <configTemplates>
@@ -46,50 +47,25 @@ namespace Tests
         [SetUp]
         public void Setup()
         {
-            //there's a copy of the test.xml made into the in the Debug/bin directory
-
             string test = Path.Combine(TestContext.CurrentContext.TestDirectory, @"test.xml");
 
             System.IO.File.WriteAllText(test, xml);
 
-            sr = new SourceXmlReader(test, "dev/testConfig");
+            tr = new TextReplacer("test.xml", "testF.xml", TextReplacer.EncodeType.XML);
+     
         }
 
         [Test]
-         public void Test1ProperKeyValueFromXML()
-         {
-            var a = sr.getKeyValuePair();
-            Assert.AreEqual(3, a.Count);
-
-            List<string> keys = new List<string>(a.Keys);
-
-            Assert.AreEqual(true, keys.Contains("value1"));
-            Assert.AreEqual("1", a["value1"]);
-
-            Assert.AreEqual(true, keys.Contains("value2"));
-            Assert.AreEqual("2", a["value2"]);
-
-            Assert.AreEqual(true, keys.Contains("value3"));
-            Assert.AreEqual("&<dev>", a["value3"]);
-        }
-
-        [Test]
-        public void Test2ChangeSection()
+        public void Test1Encoding()
         {
-            sr.Section = "/prd/testConfig";
-            var a = sr.getKeyValuePair();
-            Assert.AreEqual(3, a.Count);
+            tr.Encoding = TextReplacer.EncodeType.XML;
+            Assert.AreEqual("&apos;&lt;hello&amp;welcome&gt;&apos;", tr.EncodeValue("'<hello&welcome>'"));
 
-            List<string> keys = new List<string>(a.Keys);
+            tr.Encoding = TextReplacer.EncodeType.SQL;
+            Assert.AreEqual("''hello''", tr.EncodeValue("'hello'"));
 
-            Assert.AreEqual(true, keys.Contains("value1"));
-            Assert.AreEqual("3", a["value1"]);
-
-            Assert.AreEqual(true, keys.Contains("value2"));
-            Assert.AreEqual("1", a["value2"]);
-
-            Assert.AreEqual(true, keys.Contains("value3"));
-            Assert.AreEqual("&<prd>", a["value3"]);
+            tr.Encoding = TextReplacer.EncodeType.HTML;
+            Assert.AreEqual("&#39;hello world&#39;", tr.EncodeValue("'hello world'"));
         }
     }
 }
